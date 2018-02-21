@@ -1,16 +1,14 @@
 import org.bouncycastle.asn1.x9.X9ECParameters;
 import org.bouncycastle.crypto.ec.CustomNamedCurves;
 import org.bouncycastle.crypto.params.ECDomainParameters;
-import org.bouncycastle.jcajce.provider.keystore.PKCS12;
 import org.bouncycastle.jce.ECNamedCurveTable;
 import org.bouncycastle.jce.spec.ECNamedCurveParameterSpec;
 import org.bouncycastle.math.ec.FixedPointUtil;
+import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
 
+import java.io.StringWriter;
 import java.math.BigInteger;
 import java.security.*;
-import java.security.spec.ECParameterSpec;
-import java.security.spec.PKCS8EncodedKeySpec;
-import java.util.Arrays;
 import java.util.Base64;
 import java.util.Date;
 
@@ -44,7 +42,7 @@ public class Main {
         }
     }
 
-    public static void main(String[] args) throws GeneralSecurityException {
+    public static void main(String[] args) throws Exception {
         Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
 
         KeyPairGenerator g = KeyPairGenerator.getInstance("ECDSA", "BC");
@@ -52,7 +50,15 @@ public class Main {
 
         KeyPair keyPair = g.generateKeyPair();
 
-        String encodeToString = Base64.getEncoder().encodeToString(keyPair.getPrivate().getEncoded());
-        System.out.println(encodeToString);
+        String pk = exportPrivate(keyPair);
+        System.out.println(pk);
+    }
+
+    public static String exportPrivate(KeyPair keyPair) throws Exception {
+        StringWriter sw = new StringWriter();
+        JcaPEMWriter pemWriter = new JcaPEMWriter(sw);
+        pemWriter.writeObject(keyPair.getPrivate());
+        pemWriter.close();
+        return sw.toString();
     }
 }
