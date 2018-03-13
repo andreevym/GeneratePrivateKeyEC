@@ -8,8 +8,13 @@ import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
 
 import java.io.StringWriter;
 import java.math.BigInteger;
-import java.security.*;
-import java.util.Base64;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.SecureRandom;
+import java.security.Security;
+import java.util.Arrays;
 import java.util.Date;
 
 public class Main {
@@ -45,6 +50,10 @@ public class Main {
     public static void main(String[] args) throws Exception {
         Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
 
+        generateAndSavePem("name");
+    }
+
+    private static void generateAndSavePem(String name) throws Exception {
         KeyPairGenerator g = KeyPairGenerator.getInstance("ECDSA", "BC");
         g.initialize(ecSpec, secureRandom);
 
@@ -52,6 +61,7 @@ public class Main {
 
         String pk = exportPrivate(keyPair);
         System.out.println(pk);
+        Files.write(Paths.get(name + ".pem"), Arrays.asList(pk));
     }
 
     public static String exportPrivate(KeyPair keyPair) throws Exception {
